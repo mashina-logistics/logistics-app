@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from backend.database import get_db
-from backend.models import Broadcast, User
-from backend.schemas import BroadcastCreate, BroadcastResponse
+from database import get_db
+from models import Broadcast, User
+from schemas import BroadcastCreate, BroadcastResponse
 
 router = APIRouter(prefix="/broadcasts", tags=["broadcasts"])
 
