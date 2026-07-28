@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import Optional, List
-from backend.database import get_db
-from backend.models import Task, Waypoint, Document, User
-from backend.schemas import TaskCreate, TaskResponse
+from database import get_db
+from models import Task, Waypoint, Document, User
+from schemas import TaskCreate, TaskResponse
 import os
 import httpx
 from datetime import datetime
