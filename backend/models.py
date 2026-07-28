@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from backend.database import Base
+from database import Base
 from datetime import datetime
+
 
 class User(Base):
     __tablename__ = "users"
@@ -12,6 +13,7 @@ class User(Base):
     phone = Column(String)
     vehicle_number = Column(String)
     tasks = relationship("Task", back_populates="driver")
+
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -24,8 +26,11 @@ class Task(Base):
     delivery_city = Column(String)
     status = Column(String, default="new")
     driver = relationship("User", back_populates="tasks")
-    waypoints = relationship("Waypoint", back_populates="task", cascade="all, delete-orphan", order_by="Waypoint.order_num")
+    waypoints = relationship("Waypoint", back_populates="task",
+                             cascade="all, delete-orphan",
+                             order_by="Waypoint.order_num")
     documents = relationship("Document", back_populates="task")
+
 
 class Waypoint(Base):
     __tablename__ = "waypoints"
@@ -44,6 +49,7 @@ class Waypoint(Base):
     completed_at = Column(DateTime)
     task = relationship("Task", back_populates="waypoints")
 
+
 class Document(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True, index=True)
@@ -53,6 +59,7 @@ class Document(Base):
     file_url = Column(String, nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     task = relationship("Task", back_populates="documents")
+
 
 class Broadcast(Base):
     __tablename__ = "broadcasts"
