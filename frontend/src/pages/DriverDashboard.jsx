@@ -65,7 +65,7 @@ export default function DriverDashboard({ user }) {
     formData.append('task_id', taskId);
 
     try {
-      const response = await fetch(`${API_URL}/documents/`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}/upload-document`, {
         method: 'POST',
         body: formData
       });
