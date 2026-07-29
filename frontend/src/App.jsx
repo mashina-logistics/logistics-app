@@ -54,6 +54,8 @@ export default function App() {
 
   if (loading) return <div style={{padding: 40, textAlign: 'center'}}>Загрузка...</div>;
 
-  // Для теста - показываем панель водителя
-return <DriverDashboard user={user} />;
+// Показываем панель в зависимости от роли
+return user.role === 'logistician' 
+  ? <LogisticianDashboard user={user} /> 
+  : <DriverDashboard user={user} />;
 }
