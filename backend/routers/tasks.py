@@ -54,7 +54,21 @@ def get_driver_tasks(driver_id: int, db: Session = Depends(get_db)):
 @router.get("/", response_model=List[TaskResponse])
 def get_all_tasks(db: Session = Depends(get_db)):
     return db.query(Task).filter(Task.status != "completed").all()
-
+@router.patch("/{task_id}/status", response_model=TaskResponse)
+def update_task_status(task_id: int, status_data: dict, db: Session = Depends(get_db)):
+    """Обновить статус рейса"""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Рейс не найден")
+    
+    new_status = status_data.get("status")
+    if new_status not in ["new", "in_progress", "completed", "cancelled"]:
+        raise HTTPException(status_code=400, detail="Неверный статус")
+    
+    task.status = new_status
+    db.commit()
+    db.refresh(task)
+    return task
 @router.post("/{task_id}/waypoint/{waypoint_id}/status")
 def update_waypoint_status(task_id: int, waypoint_id: int, status: str, db: Session = Depends(get_db)):
     waypoint = db.query(Waypoint).filter(Waypoint.id == waypoint_id, Waypoint.task_id == task_id).first()
