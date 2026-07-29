@@ -13,7 +13,7 @@ export default function App() {
       try {
         // Получаем данные из Telegram WebApp (если доступно)
         const tg = window.Telegram?.WebApp?.initDataUnsafe?.user;
-        const messengerId = tg?.id?.toString() || '12345';  // messenger_id водителя Ивана
+        const messengerId = tg?.id?.toString() || 'test_logistician';
         const fullName = (tg?.first_name || 'Тест') + ' ' + (tg?.last_name || 'Логист');
 
         // Пытаемся найти пользователя в базе
@@ -30,7 +30,7 @@ export default function App() {
             body: JSON.stringify({
               messenger_id: messengerId,
               full_name: fullName,
-              role: 'driver',  // Создаём водителя для теста
+              role: 'logistician',
               phone: '+79999999999'
             })
           });
