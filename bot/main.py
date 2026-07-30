@@ -190,7 +190,7 @@ async def show_main_menu(message: types.Message, role: str):
         )
 # ===== ОБРАБОТЧИКИ КНОПОК =====
 
-@dp.callback_query_handler(lambda c: c.data == 'my_trips')
+@dp.callback_query(lambda c: c.data == 'my_trips')
 async def process_my_trips(callback_query: types.CallbackQuery):
     """Показать мои рейсы"""
     user_id = callback_query.from_user.id
@@ -243,7 +243,7 @@ async def process_my_trips(callback_query: types.CallbackQuery):
     await callback_query.answer()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'stats')
+@dp.callback_query(lambda c: c.data == 'stats')
 async def process_stats(callback_query: types.CallbackQuery):
     """Показать статистику"""
     try:
@@ -277,7 +277,7 @@ async def process_stats(callback_query: types.CallbackQuery):
     await callback_query.answer()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'help')
+@dp.callback
 async def process_help(callback_query: types.CallbackQuery):
     """Показать помощь"""
     text = (
