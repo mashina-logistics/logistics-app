@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -7,7 +9,36 @@ from schemas import TaskCreate, TaskResponse
 import os
 import httpx
 from datetime import datetime
+import asyncio
 
+# Функция отправки уведомления водителю
+async def send_driver_notification(driver_messenger_id: str, task_id: int, sender: str, receiver: str, city: str):
+    """Отправить уведомление водителю о новом рейсе"""
+    try:
+        bot_token = os.getenv("BOT_TOKEN")
+        if not bot_token:
+            logger.warning("BOT_TOKEN не настроен")
+            return
+        
+        message = (
+            f"🚚 <b>Новый рейс #{task_id}!</b>\n\n"
+            f"<b>От:</b> {sender}\n"
+            f"<b>До:</b> {receiver}\n"
+            f"<b>Город:</b> {city}\n\n"
+            f"Откройте приложение для подробностей:"
+        )
+        
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        data = {
+            "chat_id": driver_messenger_id,
+            "text": message,
+            "parse_mode": "HTML"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            await client.post(url, json=data)
+    except Exception as e:
+        logger.error(f"Ошибка отправки уведомления: {e}")
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
