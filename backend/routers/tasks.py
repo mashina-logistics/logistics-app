@@ -45,7 +45,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 @router.post("/", response_model=TaskResponse)
-def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
+async def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
     driver = db.query(User).filter(User.id == task_data.driver_id).first()
     if not driver:
         raise HTTPException(status_code=404, detail="Водитель не найден")
@@ -76,6 +76,17 @@ def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
     
     db.commit()
     db.refresh(task)
+    
+    # Отправляем уведомление водителю
+    if driver:
+        await send_driver_notification(
+            driver_messenger_id=str(driver.messenger_id),
+            task_id=task.id,
+            sender=task.sender,
+            receiver=task.receiver,
+            city=task.delivery_city
+        )
+    
     return task
 
 @router.get("/driver/{driver_id}", response_model=List[TaskResponse])
