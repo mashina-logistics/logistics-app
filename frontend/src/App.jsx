@@ -15,6 +15,11 @@ export default function App() {
         const tg = window.Telegram?.WebApp?.initDataUnsafe?.user;
         const messengerId = tg?.id?.toString() || '';
         const fullName = (tg?.first_name || 'Тест') + ' ' + (tg?.last_name || 'Логист');
+        console.log('=== TELEGRAM WEBAPP DEBUG ===');
+console.log('tg:', tg);
+console.log('tg.id:', tg?.id);
+console.log('messengerId:', messengerId);
+console.log('===========================');
 
         // Пытаемся найти пользователя в базе
         const response = await fetch(`${API_URL}/users/by-messenger/${messengerId}`);
