@@ -82,7 +82,29 @@ export default function DriverDashboard({ user }) {
 
     setUploading(false);
   };
-
+const updateWaypointStatus = async (taskId, waypointId, status) => {
+  setLoading(true);
+  setMessage('');
+  
+  try {
+    const response = await fetch(
+      `${API_URL}/tasks/${taskId}/waypoint/${waypointId}/status?status=${status}`,
+      { method: 'POST' }
+    );
+    
+    if (response.ok) {
+      setMessage('✅ Статус точки обновлён!');
+      loadTasks();
+    } else {
+      setMessage('❌ Ошибка обновления статуса');
+    }
+  } catch (error) {
+    setMessage('❌ Ошибка сети');
+    console.error(error);
+  }
+  
+  setLoading(false);
+};
   const getStatusColor = (status) => {
     const colors = {
       'new': '#3498db',
@@ -176,6 +198,74 @@ export default function DriverDashboard({ user }) {
                         {wp.weight_kg && `${wp.weight_kg} кг`}
                       </p>
                     )}
+                    {/* Кнопки управления статусом точки */}
+<div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+  {!wp.arrived_at && (
+    <button
+      onClick={() => updateWaypointStatus(task.id, wp.id, 'arrived')}
+      disabled={loading}
+      style={{
+        padding: '6px 12px',
+        background: '#007bff',
+        color: 'white',
+        border: 'none',
+        borderRadius: 4,
+        cursor: loading ? 'not-allowed' : 'pointer',
+        fontSize: 13
+      }}
+    >
+      📍 Прибыл
+    </button>
+  )}
+  
+  {wp.arrived_at && !wp.started_at && (
+    <button
+      onClick={() => updateWaypointStatus(task.id, wp.id, 'started')}
+      disabled={loading}
+      style={{
+        padding: '6px 12px',
+        background: '#ffc107',
+        color: '#000',
+        border: 'none',
+        borderRadius: 4,
+        cursor: loading ? 'not-allowed' : 'pointer',
+        fontSize: 13
+      }}
+    >
+      🔄 Начал {wp.waypoint_type === 'loading' ? 'погрузку' : 'выгрузку'}
+    </button>
+  )}
+  
+  {wp.started_at && !wp.completed_at && (
+    <button
+      onClick={() => updateWaypointStatus(task.id, wp.id, 'completed')}
+      disabled={loading}
+      style={{
+        padding: '6px 12px',
+        background: '#28a745',
+        color: 'white',
+        border: 'none',
+        borderRadius: 4,
+        cursor: loading ? 'not-allowed' : 'pointer',
+        fontSize: 13
+      }}
+    >
+      ✅ Завершил
+    </button>
+  )}
+  
+  {wp.completed_at && (
+    <span style={{
+      padding: '6px 12px',
+      background: '#28a745',
+      color: 'white',
+      borderRadius: 4,
+      fontSize: 13
+    }}>
+      ✅ Выполнено
+    </span>
+  )}
+</div>
                   </div>
                 ))}
               </div>
