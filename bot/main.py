@@ -162,12 +162,11 @@ async def register_logistician(message: types.Message):
 async def show_main_menu(message: types.Message, role: str):
     """Показать главное меню в зависимости от роли"""
     if role == "driver":
-        kb = InlineKeyboardMarkup(row_width=1)
-        kb.add(
-            InlineKeyboardButton(text="📋 Мои рейсы", callback_data="my_trips"),
-            InlineKeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL)),
-            InlineKeyboardButton(text="❓ Помощь", callback_data="help")
-        )
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="📋 Мои рейсы", callback_data="my_trips")],
+    [InlineKeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL))],
+    [InlineKeyboardButton(text="❓ Помощь", callback_data="help")]
+])
         
         await message.answer(
             "🚚 <b>Меню водителя</b>\n\nВыберите действие:",
@@ -176,11 +175,11 @@ async def show_main_menu(message: types.Message, role: str):
         )
         
     else:
-        kb = InlineKeyboardMarkup(row_width=1)
-        kb.add(
-            InlineKeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL)),
-            InlineKeyboardButton(text="📊 Статистика", callback_data="stats"),
-            InlineKeyboardButton(text="❓ Помощь", callback_data="help")
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL))],
+    [InlineKeyboardButton(text="📊 Статистика", callback_data="stats")],
+    [InlineKeyboardButton(text="❓ Помощь", callback_data="help")]
+])
         )
         
         await message.answer(
