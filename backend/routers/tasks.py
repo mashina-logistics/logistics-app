@@ -112,7 +112,7 @@ def update_task_status(task_id: int, status_data: dict, db: Session = Depends(ge
     db.refresh(task)
     return task
 @router.post("/{task_id}/waypoint/{waypoint_id}/status")
-def update_waypoint_status(task_id: int, waypoint_id: int, status: str, db: Session = Depends(get_db)):
+async def update_waypoint_status(task_id: int, waypoint_id: int, status: str, db: Session = Depends(get_db)):
     waypoint = db.query(Waypoint).filter(Waypoint.id == waypoint_id, Waypoint.task_id == task_id).first()
     if not waypoint:
         raise HTTPException(status_code=404, detail="Точка не найдена")
@@ -128,6 +128,10 @@ def update_waypoint_status(task_id: int, waypoint_id: int, status: str, db: Sess
         raise HTTPException(status_code=400, detail="Неверный статус")
     
     db.commit()
+        # Уведомляем логиста
+    await notify_logistician_about_waypoint_status(
+        db, waypoint.task_id, waypoint_id, status
+    )
     return {"status": "ok", "time": now.isoformat()}
 
 @router.post("/{task_id}/upload-document")
@@ -162,3 +166,57 @@ async def upload_document(
     db.commit()
     
     return {"file_url": file_url}
+async def notify_logistician_about_waypoint_status(
+    db: Session, task_id: int, waypoint_id: int, status: str
+):
+    """Отправить уведомление логисту о смене статуса точки"""
+    try:
+        task = db.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            return
+        
+        driver = db.query(User).filter(User.id == task.driver_id).first()
+        if not driver or not driver.messenger_id:
+            return
+        
+        waypoint = db.query(Waypoint).filter(Waypoint.id == waypoint_id).first()
+        if not waypoint:
+            return
+        
+        status_text = {
+            "arrived": "📍 Прибыл на точку",
+            "started": "🔄 Начал работу",
+            "completed": "✅ Завершил работу"
+        }.get(status, status)
+        
+        waypoint_type_text = {
+            "loading": "погрузку",
+            "unloading": "выгрузку"
+        }.get(waypoint.waypoint_type, waypoint.waypoint_type)
+        
+        message = (
+            f"{status_text}!\n\n"
+            f"<b>Точка #{waypoint_id}</b> — {waypoint_type_text}\n"
+            f"<b>Адрес:</b> {waypoint.address}\n"
+            f"<b>Город:</b> {waypoint.city}\n"
+            f"<b>Водитель:</b> {driver.full_name}"
+        )
+        
+        bot_token = os.getenv("BOT_TOKEN")
+        if not bot_token:
+            return
+        
+        logisticians = db.query(User).filter(User.role == "logistician").all()
+        
+        async with httpx.AsyncClient() as client:
+            for logistician in logisticians:
+                if logistician.messenger_id:
+                    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                    data = {
+                        "chat_id": logistician.messenger_id,
+                        "text": message,
+                        "parse_mode": "HTML"
+                    }
+                    await client.post(url, json=data, timeout=5.0)
+    except Exception as e:
+        logger.error(f"Ошибка уведомления логиста: {e}")
