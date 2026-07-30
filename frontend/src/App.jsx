@@ -57,10 +57,31 @@ console.log('===========================');
     fetchUser();
   }, []);
 
-  if (loading) return <div style={{padding: 40, textAlign: 'center'}}>Загрузка...</div>;
+ if (loading) return <div style={{padding: 40, textAlign: 'center'}}>Загрузка...</div>;
 
-// Показываем панель в зависимости от роли
-return user.role === 'logistician' 
-  ? <LogisticianDashboard user={user} /> 
-  : <DriverDashboard user={user} />;
-}
+return (
+  <>
+    {/* Блок отладки */}
+    <div style={{
+      padding: 15, 
+      background: '#fff3cd', 
+      margin: '20px 15px',
+      fontSize: 13,
+      borderRadius: 8,
+      border: '2px solid #ffc107'
+    }}>
+      <strong>🔍 Отладка:</strong><br/>
+      Telegram ID: <strong>{messengerId || 'пусто'}</strong><br/>
+      Ваша роль: <strong style={{color: user?.role === 'driver' ? 'green' : 'blue'}}>
+        {user?.role || 'не определена'}
+      </strong><br/>
+      Имя: {user?.full_name}
+    </div>
+
+    {/* Основная панель */}
+    {user.role === 'logistician'
+      ? <LogisticianDashboard user={user} />
+      : <DriverDashboard user={user} />
+    }
+  </>
+);
