@@ -3,7 +3,7 @@ import logging
 import httpx
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command, CommandStart
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -159,40 +159,142 @@ async def register_logistician(message: types.Message):
         await message.answer("❌ Ошибка сети. Попробуйте позже.")
 
 
-# ===== ГЛАВНОЕ МЕНЮ =====
 async def show_main_menu(message: types.Message, role: str):
     """Показать главное меню в зависимости от роли"""
     if role == "driver":
-        kb = ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="📋 Мои рейсы")],
-                [KeyboardButton(text=" Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL))],
-                [KeyboardButton(text="❓ Помощь")]
-            ],
-            resize_keyboard=True
+        kb = InlineKeyboardMarkup(row_width=1)
+        kb.add(
+            InlineKeyboardButton(text="📋 Мои рейсы", callback_data="my_trips"),
+            InlineKeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL)),
+            InlineKeyboardButton(text="❓ Помощь", callback_data="help")
         )
+        
         await message.answer(
-            "🚚 <b>Меню водителя</b>\n\n"
-            "Выберите действие:",
+            "🚚 <b>Меню водителя</b>\n\nВыберите действие:",
             reply_markup=kb,
             parse_mode="HTML"
         )
+        
     else:
-        kb = ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL))],
-                [KeyboardButton(text="📊 Статистика")],
-                [KeyboardButton(text="❓ Помощь")]
-            ],
-            resize_keyboard=True
+        kb = InlineKeyboardMarkup(row_width=1)
+        kb.add(
+            InlineKeyboardButton(text="🌐 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL)),
+            InlineKeyboardButton(text="📊 Статистика", callback_data="stats"),
+            InlineKeyboardButton(text="❓ Помощь", callback_data="help")
         )
+        
         await message.answer(
-            "💼 <b>Меню логиста</b>\n\n"
-            "Используйте веб-приложение для управления рейсами:",
+            "💼 <b>Меню логиста</b>\n\nИспользуйте веб-приложение для управления рейсами:",
             reply_markup=kb,
             parse_mode="HTML"
         )
+# ===== ОБРАБОТЧИКИ КНОПОК =====
 
+@dp.callback_query_handler(lambda c: c.data == 'my_trips')
+async def process_my_trips(callback_query: types.CallbackQuery):
+    """Показать мои рейсы"""
+    user_id = callback_query.from_user.id
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Получаем пользователя
+            user_response = await client.get(f"{API_URL}/users/by-messenger/{user_id}")
+            
+            if user_response.status_code == 200:
+                user_data = user_response.json()
+                driver_id = user_data.get('id')
+                
+                # Получаем рейсы водителя
+                tasks_response = await client.get(f"{API_URL}/tasks/")
+                
+                if tasks_response.status_code == 200:
+                    all_tasks = tasks_response.json()
+                    driver_tasks = [t for t in all_tasks if t.get('driver_id') == driver_id]
+                    
+                    if driver_tasks:
+                        text = " <b>Ваши рейсы:</b>\n\n"
+                        for task in driver_tasks:
+                            status_emoji = {
+                                'new': '🆕',
+                                'in_progress': '🚚',
+                                'completed': '✅',
+                                'cancelled': '❌'
+                            }.get(task.get('status'), '📦')
+                            
+                            text += (
+                                f"{status_emoji} <b>Рейс #{task.get('id')}</b>\n"
+                                f"От: {task.get('sender')}\n"
+                                f"До: {task.get('receiver')}\n"
+                                f"Город: {task.get('delivery_city')}\n"
+                                f"Статус: {task.get('status')}\n\n"
+                            )
+                        
+                        await callback_query.message.answer(text, parse_mode="HTML")
+                    else:
+                        await callback_query.message.answer(" У вас пока нет рейсов")
+                else:
+                    await callback_query.message.answer(" Ошибка загрузки рейсов")
+            else:
+                await callback_query.message.answer("❌ Пользователь не найден")
+    except Exception as e:
+        logger.error(f"Ошибка загрузки рейсов: {e}")
+        await callback_query.message.answer("❌ Ошибка сети")
+    
+    await callback_query.answer()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'stats')
+async def process_stats(callback_query: types.CallbackQuery):
+    """Показать статистику"""
+    try:
+        async with httpx.AsyncClient() as client:
+            # Получаем все рейсы
+            tasks_response = await client.get(f"{API_URL}/tasks/")
+            
+            if tasks_response.status_code == 200:
+                all_tasks = tasks_response.json()
+                
+                total = len(all_tasks)
+                new = len([t for t in all_tasks if t.get('status') == 'new'])
+                in_progress = len([t for t in all_tasks if t.get('status') == 'in_progress'])
+                completed = len([t for t in all_tasks if t.get('status') == 'completed'])
+                
+                text = (
+                    "📊 <b>Статистика рейсов:</b>\n\n"
+                    f"📦 Всего рейсов: {total}\n"
+                    f"🆕 Новые: {new}\n"
+                    f"🚚 В пути: {in_progress}\n"
+                    f"✅ Завершённые: {completed}"
+                )
+                
+                await callback_query.message.answer(text, parse_mode="HTML")
+            else:
+                await callback_query.message.answer("❌ Ошибка загрузки статистики")
+    except Exception as e:
+        logger.error(f"Ошибка загрузки статистики: {e}")
+        await callback_query.message.answer("❌ Ошибка сети")
+    
+    await callback_query.answer()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'help')
+async def process_help(callback_query: types.CallbackQuery):
+    """Показать помощь"""
+    text = (
+        "❓ <b>Помощь</b>\n\n"
+        "🚚 <b>Для водителей:</b>\n"
+        "- Нажмите 'Мои рейсы' чтобы увидеть назначенные рейсы\n"
+        "- Откройте приложение для обновления статуса точек\n"
+        "- Загружайте документы через приложение\n\n"
+        "💼 <b>Для логистов:</b>\n"
+        "- Откройте приложение для создания рейсов\n"
+        "- Назначайте водителей\n"
+        "- Отслеживайте статусы в реальном времени\n\n"
+        "📱 При возникновении проблем обратитесь к администратору."
+    )
+    
+    await callback_query.message.answer(text, parse_mode="HTML")
+    await callback_query.answer()
 
 # ===== МОИ РЕЙСЫ =====
 @dp.message(F.text == " Мои рейсы")
