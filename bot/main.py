@@ -180,7 +180,7 @@ async def show_main_menu(message: types.Message, role: str):
     [InlineKeyboardButton(text="📊 Статистика", callback_data="stats")],
     [InlineKeyboardButton(text="❓ Помощь", callback_data="help")]
 ])
-        )
+        
         
         await message.answer(
             "💼 <b>Меню логиста</b>\n\nИспользуйте веб-приложение для управления рейсами:",
