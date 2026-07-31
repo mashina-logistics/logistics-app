@@ -51,33 +51,46 @@ export default function LogisticianDashboard({ user }) {
         const data = await response.json();
         setDrivers(data);
       }
-      
-const deleteTask = async (taskId) => {
-  if (!window.confirm('Удалить этот рейс?')) return;
-  
-  setLoading(true);
-  setMessage('');
-  
-  try {
-    const response = await fetch(`${API_URL}/tasks/${taskId}`, {
-      method: 'DELETE'
-    });
-    
-    if (response.ok) {
-      setMessage('✅ Рейс удалён');
-      loadTasks();
-    } else {
-      setMessage('❌ Ошибка удаления');
-    }
-  } catch (error) {
-    setMessage('❌ Ошибка сети');
-    console.error(error);
-  }
-  
-  setLoading(false);
-};
     } catch (error) {
       console.error('Ошибка загрузки водителей:', error);
+    }
+  };
+
+  // ⚠️ ВНИМАНИЕ: Эта функция должна быть ОТДЕЛЬНО, после закрывающей скобки loadDrivers
+  const deleteTask = async (taskId) => {
+    if (!window.confirm('Удалить этот рейс?')) return;
+    
+    setLoading(true);
+    setMessage('');
+    
+    try {
+      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        setMessage('✅ Рейс удалён');
+        loadTasks();
+      } else {
+        setMessage('❌ Ошибка удаления');
+      }
+    } catch (error) {
+      setMessage('❌ Ошибка сети');
+      console.error(error);
+    }
+    
+    setLoading(false);
+  };
+
+  const loadTasks = async () => {
+    try {
+      const response = await fetch(`${API_URL}/tasks/`);
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки рейсов:', error);
     }
   };
 
