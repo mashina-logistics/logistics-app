@@ -79,7 +79,7 @@ async def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
             client_address=wp.client_address or "",
             client_contact=wp.client_contact or "",
         )
-            db.add(waypoint)
+        db.add(waypoint)
     
     db.commit()
     db.refresh(task)
