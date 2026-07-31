@@ -34,20 +34,24 @@ class Task(Base):
 
 class Waypoint(Base):
     __tablename__ = "waypoints"
+    
     id = Column(Integer, primary_key=True, index=True)
     task_id = Column(Integer, ForeignKey("tasks.id"))
-    order_num = Column(Integer, nullable=False)
+    order_num = Column(Integer)
     waypoint_type = Column(String)
-    address = Column(String, nullable=False)
-    city = Column(String)
-    contact_name = Column(String)
-    contact_phone = Column(String)
-    pallets = Column(Integer)
-    weight_kg = Column(Integer)
-    arrived_at = Column(DateTime)
-    started_at = Column(DateTime)
-    completed_at = Column(DateTime)
-    task = relationship("Task", back_populates="waypoints")
+    address = Column(String)
+    city = Column(String, default="")
+    contact_name = Column(String, default="")
+    contact_phone = Column(String, default="")
+    pallets = Column(Integer, nullable=True)
+    weight_kg = Column(Integer, nullable=True)
+    delivery_type = Column(String, default="client")
+    tk_name = Column(String, default="")
+    tk_address = Column(String, default="")
+    tk_contact = Column(String, default="")
+    client_name = Column(String, default="")
+    client_address = Column(String, default="")
+    client_contact = Column(String, default="")
 
 
 class Document(Base):
