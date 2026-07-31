@@ -61,25 +61,25 @@ async def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
     db.flush()
     
     for wp in task_data.waypoints:
-    waypoint = Waypoint(
-        task_id=task.id,
-        order_num=wp.order_num,
-        waypoint_type=wp.waypoint_type,
-        address=wp.address,
-        city=wp.city,
-        contact_name=wp.contact_name,
-        contact_phone=wp.contact_phone,
-        pallets=wp.pallets,
-        weight_kg=wp.weight_kg,
-        delivery_type=wp.delivery_type or "client",
-        tk_name=wp.tk_name or "",
-        tk_address=wp.tk_address or "",
-        tk_contact=wp.tk_contact or "",
-        client_name=wp.client_name or "",
-        client_address=wp.client_address or "",
-        client_contact=wp.client_contact or "",
-    )
-        db.add(waypoint)
+        waypoint = Waypoint(
+            task_id=task.id,
+            order_num=wp.order_num,
+            waypoint_type=wp.waypoint_type,
+            address=wp.address,
+            city=wp.city,
+            contact_name=wp.contact_name,
+            contact_phone=wp.contact_phone,
+            pallets=wp.pallets,
+            weight_kg=wp.weight_kg,
+            delivery_type=wp.delivery_type or "client",
+            tk_name=wp.tk_name or "",
+            tk_address=wp.tk_address or "",
+            tk_contact=wp.tk_contact or "",
+            client_name=wp.client_name or "",
+            client_address=wp.client_address or "",
+            client_contact=wp.client_contact or "",
+        )
+            db.add(waypoint)
     
     db.commit()
     db.refresh(task)
