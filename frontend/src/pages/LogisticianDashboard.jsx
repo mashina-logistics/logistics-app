@@ -60,11 +60,11 @@ export default function LogisticianDashboard({ user }) {
   };
 
   const addWaypoint = () => {
-    setFormData({
-      ...formData,
-      waypoints: [...formData.waypoints, { order_num: formData.waypoints.length + 1, waypoint_type: 'loading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '' }]
-    });
-  };
+  setFormData({
+    ...formData,
+    waypoints: [...formData.waypoints, { order_num: formData.waypoints.length + 1, waypoint_type: 'loading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '', delivery_type: 'client', tk_name: '', tk_address: '', tk_contact: '', client_name: '', client_address: '', client_contact: '' }]
+  });
+};
 
   const removeWaypoint = (index) => {
     if (formData.waypoints.length <= 2) return;
