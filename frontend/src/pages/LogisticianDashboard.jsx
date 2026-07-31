@@ -80,15 +80,18 @@ export default function LogisticianDashboard({ user }) {
         driver_id: parseInt(formData.driver_id),
         sender: formData.sender, receiver: formData.receiver, payer: formData.payer, delivery_city: formData.delivery_city,
         waypoints: formData.waypoints.map((wp, index) => ({
-          order_num: index + 1, waypoint_type: wp.waypoint_type, address: wp.address, city: wp.city,
-          contact_name: wp.contact_name, contact_phone: wp.contact_phone,
-          pallets: wp.pallets ? parseInt(wp.pallets) : null, weight_kg: wp.weight_kg ? parseInt(wp.weight_kg) : null
-        }))
+  order_num: index + 1, waypoint_type: wp.waypoint_type, address: wp.address, city: wp.city,
+  contact_name: wp.contact_name, contact_phone: wp.contact_phone,
+  pallets: wp.pallets ? parseInt(wp.pallets) : null, weight_kg: wp.weight_kg ? parseInt(wp.weight_kg) : null,
+  delivery_type: wp.delivery_type || 'client',
+  tk_name: wp.tk_name || '', tk_address: wp.tk_address || '', tk_contact: wp.tk_contact || '',
+  client_name: wp.client_name || '', client_address: wp.client_address || '', client_contact: wp.client_contact || ''
+}))
       };
       const response = await fetch(`${API_URL}/tasks/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(taskData) });
       if (response.ok) {
         setMessage('✅ Рейс успешно создан!');
-        setFormData({ driver_id: '', sender: '', receiver: '', payer: '', delivery_city: '', waypoints: [{ order_num: 1, waypoint_type: 'loading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '' }, { order_num: 2, waypoint_type: 'unloading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '' }] });
+        setFormData({ driver_id: '', sender: '', receiver: '', payer: '', delivery_city: '', waypoints: [{ order_num: 1, waypoint_type: 'loading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '', delivery_type: 'client', tk_name: '', tk_address: '', tk_contact: '', client_name: '', client_address: '', client_contact: '' }, { order_num: 2, waypoint_type: 'unloading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '', delivery_type: 'client', tk_name: '', tk_address: '', tk_contact: '', client_name: '', client_address: '', client_contact: '' }] });
         loadTasks();
       } else {
         const errorData = await response.json();
