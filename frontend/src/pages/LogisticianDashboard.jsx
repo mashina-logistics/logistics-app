@@ -52,6 +52,31 @@ export default function LogisticianDashboard({ user }) {
         const data = await response.json();
         setDrivers(data);
       }
+      
+const deleteTask = async (taskId) => {
+  if (!window.confirm('Удалить этот рейс?')) return;
+  
+  setLoading(true);
+  setMessage('');
+  
+  try {
+    const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+      method: 'DELETE'
+    });
+    
+    if (response.ok) {
+      setMessage('✅ Рейс удалён');
+      loadTasks();
+    } else {
+      setMessage('❌ Ошибка удаления');
+    }
+  } catch (error) {
+    setMessage('❌ Ошибка сети');
+    console.error(error);
+  }
+  
+  setLoading(false);
+};
     } catch (error) {
       console.error('Ошибка загрузки водителей:', error);
     }
@@ -407,6 +432,22 @@ export default function LogisticianDashboard({ user }) {
               <strong>Рейс #{task.id}</strong>
               <p>От: {task.sender} → До: {task.receiver}</p>
               <p>Город: {task.delivery_city} | Статус: {task.status}</p>
+              <button
+  onClick={() => deleteTask(task.id)}
+  disabled={loading}
+  style={{
+    padding: '6px 12px',
+    background: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: 4,
+    cursor: loading ? 'not-allowed' : 'pointer',
+    fontSize: 13,
+    marginTop: 8
+  }}
+>
+  ️ Удалить
+</button>
             </div>
           ))
         )}
