@@ -221,7 +221,7 @@ async def notify_logistician_about_waypoint_status(
     except Exception as e:
         logger.error(f"Ошибка уведомления логиста: {e}")
         
-@router.delete("/tasks/{task_id}")
+@router.delete("/{task_id}")
 async def delete_task(task_id: int, db: Session = Depends(get_db)):
     """Удалить рейс"""
     task = db.query(Task).filter(Task.id == task_id).first()
