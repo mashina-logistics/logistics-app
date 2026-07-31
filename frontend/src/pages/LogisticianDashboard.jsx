@@ -142,6 +142,61 @@ export default function LogisticianDashboard({ user }) {
                 <div><label style={{ display: 'block', marginBottom: 5 }}>Паллеты</label><input type="number" value={wp.pallets} onChange={(e) => handleWaypointChange(index, 'pallets', e.target.value)} style={{ width: '100%', padding: 8 }} /></div>
                 <div><label style={{ display: 'block', marginBottom: 5 }}>Вес (кг)</label><input type="number" value={wp.weight_kg} onChange={(e) => handleWaypointChange(index, 'weight_kg', e.target.value)} style={{ width: '100%', padding: 8 }} /></div>
               </div>
+              {/* Тип доставки */}
+<div style={{ marginTop: 10 }}>
+  <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}>Тип доставки *</label>
+  <select
+    value={wp.delivery_type || 'client'}
+    onChange={(e) => handleWaypointChange(index, 'delivery_type', e.target.value)}
+    style={{ width: '100%', padding: 8 }}
+  >
+    <option value="client">👤 Клиенту</option>
+    <option value="tk">🏢 В ТК (транспортную компанию)</option>
+    <option value="both">🏢 ТК + 👤 Клиент</option>
+  </select>
+</div>
+
+{/* Поля для ТК */}
+{(wp.delivery_type === 'tk' || wp.delivery_type === 'both') && (
+  <div style={{ padding: 15, background: '#f0f8ff', borderRadius: 8, marginTop: 10, marginBottom: 10 }}>
+    <h4 style={{ marginTop: 0 }}> Транспортная компания</h4>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div>
+        <label style={{ display: 'block', marginBottom: 5 }}>Название ТК</label>
+        <input type="text" value={wp.tk_name || ''} onChange={(e) => handleWaypointChange(index, 'tk_name', e.target.value)} style={{ width: '100%', padding: 8 }} placeholder="ПЭК, Деловые Линии" />
+      </div>
+      <div>
+        <label style={{ display: 'block', marginBottom: 5 }}>Контакт в ТК</label>
+        <input type="text" value={wp.tk_contact || ''} onChange={(e) => handleWaypointChange(index, 'tk_contact', e.target.value)} style={{ width: '100%', padding: 8 }} placeholder="Имя и телефон" />
+      </div>
+      <div style={{ gridColumn: '1 / -1' }}>
+        <label style={{ display: 'block', marginBottom: 5 }}>Адрес ТК</label>
+        <input type="text" value={wp.tk_address || ''} onChange={(e) => handleWaypointChange(index, 'tk_address', e.target.value)} style={{ width: '100%', padding: 8 }} placeholder="Адрес терминала" />
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Поля для Клиента */}
+{(wp.delivery_type === 'client' || wp.delivery_type === 'both') && (
+  <div style={{ padding: 15, background: '#f0fff0', borderRadius: 8, marginTop: 10 }}>
+    <h4 style={{ marginTop: 0 }}>👤 Клиент</h4>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div>
+        <label style={{ display: 'block', marginBottom: 5 }}>Имя клиента</label>
+        <input type="text" value={wp.client_name || ''} onChange={(e) => handleWaypointChange(index, 'client_name', e.target.value)} style={{ width: '100%', padding: 8 }} placeholder="ФИО" />
+      </div>
+      <div>
+        <label style={{ display: 'block', marginBottom: 5 }}>Телефон клиента</label>
+        <input type="text" value={wp.client_contact || ''} onChange={(e) => handleWaypointChange(index, 'client_contact', e.target.value)} style={{ width: '100%', padding: 8 }} placeholder="+7..." />
+      </div>
+      <div style={{ gridColumn: '1 / -1' }}>
+        <label style={{ display: 'block', marginBottom: 5 }}>Адрес доставки клиенту</label>
+        <input type="text" value={wp.client_address || ''} onChange={(e) => handleWaypointChange(index, 'client_address', e.target.value)} style={{ width: '100%', padding: 8 }} placeholder="Адрес" />
+      </div>
+    </div>
+  </div>
+)}
             </div>
           ))}
 
