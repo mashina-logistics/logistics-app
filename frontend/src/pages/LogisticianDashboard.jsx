@@ -11,9 +11,9 @@ export default function LogisticianDashboard({ user }) {
   const [formData, setFormData] = useState({
     driver_id: '', sender: '', receiver: '', payer: '', delivery_city: '',
     waypoints: [
-      { order_num: 1, waypoint_type: 'loading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '' },
-      { order_num: 2, waypoint_type: 'unloading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '' }
-    ]
+  { order_num: 1, waypoint_type: 'loading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '', delivery_type: 'client', tk_name: '', tk_address: '', tk_contact: '', client_name: '', client_address: '', client_contact: '' },
+  { order_num: 2, waypoint_type: 'unloading', address: '', city: '', contact_name: '', contact_phone: '', pallets: '', weight_kg: '', delivery_type: 'client', tk_name: '', tk_address: '', tk_contact: '', client_name: '', client_address: '', client_contact: '' }
+]
   });
 
   useEffect(() => { loadDrivers(); loadTasks(); }, []);
