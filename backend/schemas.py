@@ -6,11 +6,18 @@ class WaypointCreate(BaseModel):
     order_num: int
     waypoint_type: str
     address: str
-    city: Optional[str] = None
-    contact_name: Optional[str] = None
-    contact_phone: Optional[str] = None
+    city: str = ""
+    contact_name: str = ""
+    contact_phone: str = ""
     pallets: Optional[int] = None
     weight_kg: Optional[int] = None
+    delivery_type: str = "client"
+    tk_name: str = ""
+    tk_address: str = ""
+    tk_contact: str = ""
+    client_name: str = ""
+    client_address: str = ""
+    client_contact: str = ""
 
 class TaskCreate(BaseModel):
     driver_id: int
