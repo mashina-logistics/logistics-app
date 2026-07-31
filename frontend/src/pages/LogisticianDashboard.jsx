@@ -38,12 +38,12 @@ export default function LogisticianDashboard({ user }) {
       }
     ]
   });
-
   // Загрузка водителей и рейсов при монтировании
   useEffect(() => {
     loadDrivers();
     loadTasks();
   }, []);
+
   const loadDrivers = async () => {
     try {
       const response = await fetch(`${API_URL}/users/drivers`);
@@ -54,9 +54,8 @@ export default function LogisticianDashboard({ user }) {
     } catch (error) {
       console.error('Ошибка загрузки водителей:', error);
     }
-  };
+  }; // ⚠️ ВНИМАНИЕ: Здесь закрывается loadDrivers. Дальше идёт deleteTask!
 
-  // ⚠️ ВНИМАНИЕ: Эта функция должна быть ОТДЕЛЬНО, после закрывающей скобки loadDrivers
   const deleteTask = async (taskId) => {
     if (!window.confirm('Удалить этот рейс?')) return;
     
@@ -81,6 +80,19 @@ export default function LogisticianDashboard({ user }) {
     
     setLoading(false);
   };
+
+  const loadTasks = async () => {
+    try {
+      const response = await fetch(`${API_URL}/tasks/`);
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки рейсов:', error);
+    }
+  };
+  
 
   const loadTasks = async () => {
     try {
