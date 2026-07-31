@@ -44,7 +44,6 @@ export default function LogisticianDashboard({ user }) {
     loadDrivers();
     loadTasks();
   }, []);
-
   const loadDrivers = async () => {
     try {
       const response = await fetch(`${API_URL}/users/drivers`);
