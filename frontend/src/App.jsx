@@ -11,40 +11,30 @@ export default function App() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Получаем данные из Telegram WebApp (если доступно)
         const tg = window.Telegram?.WebApp?.initDataUnsafe?.user;
         const messengerId = tg?.id?.toString() || '';
         const fullName = (tg?.first_name || 'Тест') + ' ' + (tg?.last_name || 'Логист');
-        console.log('=== TELEGRAM WEBAPP DEBUG ===');
-console.log('tg:', tg);
-console.log('tg.id:', tg?.id);
-console.log('messengerId:', messengerId);
-console.log('===========================');
 
-        // Пытаемся найти пользователя в базе
         const response = await fetch(`${API_URL}/users/by-messenger/${messengerId}`);
         
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
         } else {
-          // Создаём нового пользователя (для теста - логист)
           const createResponse = await fetch(`${API_URL}/users/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               messenger_id: messengerId,
               full_name: fullName,
-             role: 'logistician',
+              role: 'logistician',
               phone: '+79999999999'
             })
           });
+          
           if (createResponse.ok) {
             const newUser = await createResponse.json();
             setUser(newUser);
-          } else {
-            // Fallback
-            setUser({ id: 1, full_name: fullName, role: 'logistician', messenger_id: messengerId });
           }
         }
       } catch (error) {
@@ -57,31 +47,14 @@ console.log('===========================');
     fetchUser();
   }, []);
 
- if (loading) return <div style={{padding: 40, textAlign: 'center'}}>Загрузка...</div>;
+  if (loading) return <div style={{padding: 40, textAlign: 'center'}}>Загрузка...</div>;
 
-return (
-  <>
-    {/* Блок отладки */}
-    <div style={{
-      padding: 15, 
-      background: '#fff3cd', 
-      margin: '20px 15px',
-      fontSize: 13,
-      borderRadius: 8,
-      border: '2px solid #ffc107'
-    }}>
-      <strong>🔍 Отладка:</strong><br/>
-      Telegram ID: <strong>{messengerId || 'пусто'}</strong><br/>
-      Ваша роль: <strong style={{color: user?.role === 'driver' ? 'green' : 'blue'}}>
-        {user?.role || 'не определена'}
-      </strong><br/>
-      Имя: {user?.full_name}
-    </div>
-
-    {/* Основная панель */}
-    {user.role === 'logistician'
-      ? <LogisticianDashboard user={user} />
-      : <DriverDashboard user={user} />
-    }
-  </>
-);
+  return (
+    <>
+      {user.role === 'logistician'
+        ? <LogisticianDashboard user={user} />
+        : <DriverDashboard user={user} />
+      }
+    </>
+  );
+}
