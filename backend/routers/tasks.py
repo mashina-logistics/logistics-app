@@ -220,3 +220,22 @@ async def notify_logistician_about_waypoint_status(
                     await client.post(url, json=data, timeout=5.0)
     except Exception as e:
         logger.error(f"Ошибка уведомления логиста: {e}")
+        
+@router.delete("/tasks/{task_id}")
+async def delete_task(task_id: int, db: Session = Depends(get_db)):
+    """Удалить рейс"""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Рейс не найден")
+    
+    # Удаляем связанные документы
+    db.query(Document).filter(Document.task_id == task_id).delete()
+    
+    # Удаляем точки маршрута
+    db.query(Waypoint).filter(Waypoint.task_id == task_id).delete()
+    
+    # Удаляем рейс
+    db.delete(task)
+    db.commit()
+    
+    return {"status": "ok", "message": "Рейс удалён"}
