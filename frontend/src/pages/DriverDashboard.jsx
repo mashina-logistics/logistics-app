@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Chat from '../components/Chat';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://logistics-app-production-e4a3.up.railway.app';
 
@@ -267,6 +268,7 @@ const updateWaypointStatus = async (taskId, waypointId, status) => {
   )}
 </div>
                   </div>
+              <Chat taskId={task.id} userId={user?.id} userRole="driver" />
                 ))}
               </div>
 
