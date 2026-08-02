@@ -267,8 +267,8 @@ const updateWaypointStatus = async (taskId, waypointId, status) => {
     </span>
   )}
 </div>
+                    <Chat taskId={task.id} userId={user?.id} userRole="driver" />
                   </div>
-              <Chat taskId={task.id} userId={user?.id} userRole="driver" />
                 ))}
               </div>
 
