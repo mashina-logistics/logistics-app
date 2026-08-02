@@ -52,6 +52,7 @@ class Waypoint(Base):
     client_name = Column(String, default="")
     client_address = Column(String, default="")
     client_contact = Column(String, default="")
+    task = relationship("Task", back_populates="waypoints")
 
 
 class Document(Base):
