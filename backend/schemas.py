@@ -32,14 +32,22 @@ class WaypointResponse(BaseModel):
     order_num: int
     waypoint_type: str
     address: str
-    city: Optional[str]
-    contact_name: Optional[str]
-    contact_phone: Optional[str]
-    pallets: Optional[int]
-    weight_kg: Optional[int]
-    arrived_at: Optional[datetime]
-    started_at: Optional[datetime]
-    completed_at: Optional[datetime]
+    city: Optional[str] = None
+    contact_name: Optional[str] = None
+    contact_phone: Optional[str] = None
+    pallets: Optional[int] = None
+    weight_kg: Optional[int] = None
+    arrived_at: Optional[datetime] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    delivery_type: Optional[str] = "client"
+    tk_name: Optional[str] = ""
+    tk_address: Optional[str] = ""
+    tk_contact: Optional[str] = ""
+    client_name: Optional[str] = ""
+    client_address: Optional[str] = ""
+    client_contact: Optional[str] = ""
+    
     class Config:
         from_attributes = True
 
