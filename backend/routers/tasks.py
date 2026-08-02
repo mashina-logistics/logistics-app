@@ -246,3 +246,88 @@ async def delete_task(task_id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"status": "ok", "message": "Рейс удалён"}
+
+
+# ===== ЧАТ МЕЖДУ ЛОГИСТОМ И ВОДИТЕЛЕМ =====
+
+@router.get("/{task_id}/messages")
+async def get_task_messages(task_id: int, db: Session = Depends(get_db)):
+    """Получить все сообщения по рейсу"""
+    from sqlalchemy import text
+    
+    result = db.execute(
+        text("SELECT id, task_id, sender_id, sender_role, text, created_at FROM messages WHERE task_id = :task_id ORDER BY created_at ASC"),
+        {"task_id": task_id}
+    )
+    rows = result.fetchall()
+    
+    return [
+        {
+            "id": row[0],
+            "task_id": row[1],
+            "sender_id": row[2],
+            "sender_role": row[3],
+            "text": row[4],
+            "created_at": row[5].isoformat() if row[5] else None
+        }
+        for row in rows
+    ]
+
+
+@router.post("/{task_id}/message")
+async def send_task_message(task_id: int, message_data: dict, db: Session = Depends(get_db)):
+    """Отправить сообщение по рейсу"""
+    from sqlalchemy import text
+    
+    sender_id = message_data.get("sender_id")
+    sender_role = message_data.get("sender_role", "logistician")
+    text_msg = message_data.get("message", "").strip()
+    
+    if not text_msg:
+        raise HTTPException(status_code=400, detail="Пустое сообщение")
+    
+    # Проверяем, что рейс существует
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Рейс не найден")
+    
+    # Сохраняем сообщение
+    db.execute(
+        text("INSERT INTO messages (task_id, sender_id, sender_role, text) VALUES (:task_id, :sender_id, :sender_role, :text)"),
+        {"task_id": task_id, "sender_id": sender_id, "sender_role": sender_role, "text": text_msg}
+    )
+    db.commit()
+    
+    # Отправляем уведомление в Telegram
+    try:
+        import os
+        import httpx
+        bot_token = os.getenv("BOT_TOKEN")
+        if bot_token:
+            if sender_role == "logistician":
+                driver = db.query(User).filter(User.id == task.driver_id).first()
+                if driver and driver.messenger_id:
+                    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                    data = {
+                        "chat_id": driver.messenger_id,
+                        "text": f"💬 Новое сообщение по рейсу #{task_id}\n\n{text_msg}",
+                        "parse_mode": "HTML"
+                    }
+                    async with httpx.AsyncClient() as client:
+                        await client.post(url, json=data, timeout=5.0)
+            else:
+                logisticians = db.query(User).filter(User.role == "logistician").all()
+                url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+                for log in logisticians:
+                    if log.messenger_id:
+                        data = {
+                            "chat_id": log.messenger_id,
+                            "text": f"💬 Сообщение от водителя по рейсу #{task_id}\n\n{text_msg}",
+                            "parse_mode": "HTML"
+                        }
+                        async with httpx.AsyncClient() as client:
+                            await client.post(url, json=data, timeout=5.0)
+    except Exception as e:
+        print(f"Ошибка отправки уведомления: {e}")
+    
+    return {"status": "ok"}
