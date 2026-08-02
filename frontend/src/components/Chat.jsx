@@ -18,8 +18,14 @@ export default function Chat({ taskId, userId, userRole }) {
   }, [isOpen, taskId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Прокручиваем только если последнее сообщение НЕ от текущего пользователя
+  if (messages.length > 0) {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.sender_id !== userId) {
+      scrollToBottom();
+    }
+  }
+}, [messages, userId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
