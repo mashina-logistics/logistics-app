@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Chat from '../components/Chat';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://logistics-app-production-e4a3.up.railway.app';
 
@@ -216,6 +217,7 @@ export default function LogisticianDashboard({ user }) {
             <p>От: {task.sender} → До: {task.receiver}</p>
             <p>Город: {task.delivery_city} | Статус: {task.status}</p>
             <button onClick={() => deleteTask(task.id)} disabled={loading} style={{ padding: '6px 12px', background: '#dc3545', color: 'white', border: 'none', borderRadius: 4, cursor: loading ? 'not-allowed' : 'pointer', fontSize: 13, marginTop: 8 }}>🗑️ Удалить</button>
+            <Chat taskId={task.id} userId={user?.id} userRole="logistician" />
           </div>
         ))}
       </div>
